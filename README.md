@@ -34,7 +34,7 @@ def getRank(domain):
 python seek.py
 ```
 
-根据您的需求，输入要查询的文件。Seek将自动检索相关的信息并显示在控制台上，并将结果保存在名为 `results.xlsx` 的文件中。目前站群判定为则为该IP下存在**5个**以上的域名。
+根据您的需求，输入要查询的文件。Seek将自动检索相关的信息并显示在控制台上，并将结果保存在名为 `results.xlsx` 的文件中。**目前站群判定规则为该IP下存在5个以上的域名**。
 
 ```
 python seek.py -file <filename>
