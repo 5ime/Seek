@@ -1,6 +1,6 @@
 import re
 import time
-from utils.utils import fetch_record, find_related_sites, saveExcel
+from utils.utils import *
 
 def process_lines(lines):
     domains = set()
@@ -25,8 +25,8 @@ def process_lines(lines):
     return domains, ips
 
 def process_assets(file_path):
-    domains = set()
-    ips = set()
+    print('[+] 目标\t资产\t备案信息\t权重信息')
+
     list = []
 
     with open(file_path, "r") as file:
@@ -35,20 +35,44 @@ def process_assets(file_path):
     domains, ips = process_lines(lines)
 
     for domain in domains:
-        domains = fetch_record(domain)
-        list.append((domain, '暂无', domains))
+        record = fetch_record(domain)
+        list.append((domain, '暂无', record))
         time.sleep(1)
+        print_result((domain, '暂无', record))
 
     for ip in ips:
         domain_set = find_related_sites(ip)
         if isinstance(domain_set, set):
             related_domains, _ = process_lines(domain_set)
             for domain in related_domains:
-                icp = fetch_record(domain)
+                record = fetch_record(domain)
                 time.sleep(1)
-                list.append((ip, domain, icp))
+                print_result((ip, domain, record))
+                list.append((ip, domain, record))
         else:
+            print_result((ip, domain_set, '暂无'))
             list.append((ip, domain_set, '暂无'))
 
-    saveExcel(list)
+    save_excel(list)
     return list
+
+def print_result(item):
+    record = item[2]
+    record_value = record[0] if isinstance(record, tuple) else record
+    pr_value = record[1] if isinstance(record, tuple) else None
+    baidu_pc_value = record[2][0] if isinstance(record, tuple) and len(record) > 2 else None
+    baidu_mobile_value = record[2][1] if isinstance(record, tuple) and len(record) > 2 else None
+
+    output = '[+] {}\t{}\t{}\t{}\t{}\t{}'.format(item[0], item[1], record_value, pr_value, baidu_pc_value, baidu_mobile_value)
+    print_colored_output(output, item)
+
+
+def print_colored_output(output, item):
+    color_code = '\033[32m'
+    if '疑似站群' in item[1]:
+        color_code = '\033[31m'
+    elif '未备案' in item[2]:
+        color_code = '\033[33m'
+    reset_code = '\033[0m'
+    colored_output = '{}{}{}'.format(color_code, output, reset_code)
+    print(colored_output)

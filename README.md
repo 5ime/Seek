@@ -23,9 +23,8 @@ pip install requirements.txt
 更改token：更换为自己的爱站API token用以查询百度权重信息，获取地址 https://www.aizhan.com/apistore/detail_23/
 
 ```python
-# utils\utils.py 第41行
-def getRank(domain):
-    token = '' # 这里填写你的token
+# utils\utils.py 第16行
+TOKEN = "" # 请填写您的爱站接口私钥
 ```
 
 运行应用程序：使用命令行界面导航到项目根目录，并执行以下命令来启动Seek：

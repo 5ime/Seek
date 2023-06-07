@@ -7,21 +7,24 @@ import hashlib
 import requests
 import fake_useragent
 from openpyxl import Workbook
+
 urllib3.disable_warnings()
 session = requests.Session()
 ua = fake_useragent.UserAgent()
 ip = f"101.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}"
 
+TOKEN = "" # 请填写您的爱站接口私钥
+
 def fetch_record(domain):
-    unitname = getUnitname(domain)
-    pagerank = getPagerank(domain)
-    rank = getRank(domain)
+    unitname = get_unitname(domain)
+    pagerank = get_pagerank(domain)
+    rank = get_rank(domain)
     return unitname, pagerank, rank
 
 def find_related_sites(ip):
-    return getWebsite(ip)
+    return get_website(ip)
 
-def getPagerank(domain):
+def get_pagerank(domain):
     url = "https://pr.aizhan.com/{}/".format(domain)
     header = {
         "User-Agent": ua.random,
@@ -37,9 +40,8 @@ def getPagerank(domain):
     except:
         return '无法获取'
 
-def getRank(domain):
-    token = '' # 这里填写你的token
-    url = 'https://apistore.aizhan.com/baidurank/siteinfos/{}?domains={}'.format(token, domain)
+def get_rank(domain):
+    url = 'https://apistore.aizhan.com/baidurank/siteinfos/{}?domains={}'.format(TOKEN, domain)
     header = {
         "User-Agent": ua.random,
         "Referer": "https://www.aizhan.com/",
@@ -49,13 +51,13 @@ def getRank(domain):
     }
     try:
         result = session.get(url, headers=header, verify=False).text
-        pcRank = json.loads(result)['data']['success'][0]['pc_br']
-        mobileRank = json.loads(result)['data']['success'][0]['m_br']
-        return pcRank, mobileRank
+        pc_rank = json.loads(result)['data']['success'][0]['pc_br']
+        mobile_rank = json.loads(result)['data']['success'][0]['m_br']
+        return pc_rank, mobile_rank
     except:
         return '无法获取'
 
-def getWebsite(ip):
+def get_website(ip):
     url = "https://api.webscan.cc/?action=query&ip=" + ip
     header = {
         "User-Agent": ua.random,
@@ -75,7 +77,7 @@ def getWebsite(ip):
     except:
         return '无同IP网站'
 
-def getToken():
+def get_token():
     timeStamp = int(time.time())
     authKey = hashlib.md5(("testtest" + str(timeStamp)).encode()).hexdigest()
     url = "https://hlwicpfwc.miit.gov.cn/icpproject_query/api/auth"
@@ -85,17 +87,17 @@ def getToken():
         "Referer": "https://beian.miit.gov.cn/",
         "User-Agent": ua.random,
         "CLIENT-IP": ip,
-        "X-FORWARDED-FOR": ip
+               "X-FORWARDED-FOR": ip
     }
-    result = session.post(url, headers=header, data=data, timeout=5, verify=False).text
-    return json.loads(result)['params']['bussiness']
+    try: 
+        result = session.post(url, headers=header, data=data, timeout=5, verify=False).text
+        return json.loads(result)['params']['bussiness']
+    except:
+        return ''
 
-try:
-    token = getToken()
-except:
-    token = ''
+token = get_token()
 
-def getUuid():
+def get_uuid():
     url = "https://hlwicpfwc.miit.gov.cn/icpproject_query/api/image/getCheckImage"
     header = {
         "Origin": "https://beian.miit.gov.cn/",
@@ -106,29 +108,21 @@ def getUuid():
     result = session.get(url, headers=header, timeout=5, verify=False).text
     uuid = json.loads(result)['params']['uuid']
     return uuid
-    
 
-import requests
-import hashlib
-import json
-import time
-
-session = requests.Session()
-
-def getUnitname(name):
+def get_unitname(name):
     url = "https://hlwicpfwc.miit.gov.cn/icpproject_query/api/icpAbbreviateInfo/queryByCondition"
     try:
         header = {
             "Content-Type": "application/json;charset=UTF-8",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+            "User-Agent": ua.random,
             "Accept": "application/json, text/plain, */*",
-            "uuid": getUuid(),
+            "uuid": get_uuid(),
             "token": token,
             "Origin": "https://beian.miit.gov.cn/",
             "Referer": "https://beian.miit.gov.cn/"
         }
     except:
-        return getUnitname2(name)
+        return get_unitname2(name)
     
     try:
         data = { "pageNum": "1", "pageSize": "100", "unitName": name }
@@ -138,7 +132,7 @@ def getUnitname(name):
     except:
         return "未备案"
 
-def getUnitname2(name):
+def get_unitname2(name):
     url = 'https://api.emoao.com/api/icp?domain=' + name
     header = {
         "User-Agent": ua.random,
@@ -154,7 +148,7 @@ def getUnitname2(name):
     except:
         return "查询失败"
 
-def saveExcel(data):
+def save_excel(data):
     workbook = Workbook()
     sheet = workbook.active
     sheet.append(['目标', '资产', '备案', '谷歌PR', 'PC百度权重', '移动百度权重'])
@@ -170,3 +164,4 @@ def saveExcel(data):
         sheet.append(row_data)
 
     workbook.save('results.xlsx')
+
