@@ -108,6 +108,13 @@ def getUuid():
     return uuid
     
 
+import requests
+import hashlib
+import json
+import time
+
+session = requests.Session()
+
 def getUnitname(name):
     url = "https://hlwicpfwc.miit.gov.cn/icpproject_query/api/icpAbbreviateInfo/queryByCondition"
     try:
@@ -120,12 +127,32 @@ def getUnitname(name):
             "Origin": "https://beian.miit.gov.cn/",
             "Referer": "https://beian.miit.gov.cn/"
         }
+    except:
+        return getUnitname2(name)
+    
+    try:
         data = { "pageNum": "1", "pageSize": "100", "unitName": name }
         result = session.post(url, headers=header, json=data, verify=False).text
         unitName = json.loads(result)['params']['list'][0]['unitName']
         return unitName
     except:
         return "未备案"
+
+def getUnitname2(name):
+    url = 'https://api.emoao.com/api/icp?domain=' + name
+    header = {
+        "User-Agent": ua.random,
+        "Referer": "https://api.emoao.com/",
+        "Origin": "https://api.emoao.com/",
+        "CLIENT-IP": ip,
+        "X-FORWARDED-FOR": ip
+    }
+    try:
+        result = session.get(url, headers=header, verify=False).text
+        unitName = json.loads(result)['unitName'] if json.loads(result)['unitName'] else '未备案'
+        return unitName
+    except:
+        return "查询失败"
 
 def saveExcel(data):
     workbook = Workbook()

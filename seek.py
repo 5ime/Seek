@@ -9,7 +9,7 @@ if __name__ == "__main__":
  \___ \\\\  ___/\  ___/|    < 
 /____  >\___  >\___  >__|_ \\
      \/     \/     \/     \/
-                version 1.0
+                version 1.0.1
                 auhtor: iami233
     ''')
 
@@ -23,7 +23,7 @@ def print_colored_output(output, item):
     colored_output = '{}{}{}'.format(color_code, output, reset_code)
     print(colored_output)
 
-description = "此工具允许您执行与IP和域名相关的操作，包括同IP站点查找和域名备案查询。\nExample: python main.py -file assets.txt"
+description = "此工具允许您执行与IP和域名相关的操作，包括同IP站点查找和域名信息查询。\nExample: python main.py -file assets.txt"
 parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawTextHelpFormatter)
 parser.add_argument("-file", dest="file_path", help="Path to the assets file")
 args = parser.parse_args()
